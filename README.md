@@ -1,5 +1,5 @@
 # Etsy Provider for OAuth 2.0 Client
-[![GitHub tag](https://img.shields.io/github/tag/startz/oauth2-etsy.svg)](https://github.com/startz/oauth2-etsy/blob/main/tags)
+[![GitHub tag](https://img.shields.io/github/tag/startz/oauth2-etsy.svg)](https://github.com/startz/oauth2-etsy/blob/master/tags)
 [![GitHub license](https://img.shields.io/github/license/startz/oauth2-etsy.svg)](https://github.com/startz/oauth2-etsy/blob/main/LICENSE)
 [![build](https://github.com/startz/oauth2-etsy/actions/workflows/php.yml/badge.svg?branch=master)](https://github.com/startz/oauth2-etsy/actions/workflows/php.yml)
 [![codecov](https://codecov.io/gh/startz/oauth2-etsy/branch/master/graph/badge.svg)](https://codecov.io/gh/startz/oauth2-etsy)
