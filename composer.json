@@ -1,7 +1,7 @@
 {
   "name": "startz/oauth2-etsy",
   "description": "Etsy OAuth2 Client Provider for The PHP League OAuth2-Client",
-  "licence": "MIT",
+  "license": "MIT",
   "authors":[
     {
       "name": "Chuck Burgess",
