@@ -53,7 +53,27 @@ class TestEtsy extends TestCase
         $this->assertEquals('/oauth/connect', $uri['path']);
     }
 
-    public function testGetBaseAccessTokenUrl()
+    public function testGetAutorizationUrlWithParams()
+    {
+        // 'l9gfJd1F1vELfLjEvQhoCYD8w7dV_QGDZCn-Hif7miM'
+        $url = $this->provider->getAuthorizationUrl([
+            'code_challenge' => $this->provider->getPKCE('prechallenge'),
+            'code_challenge_method' => 'S256',
+        ]);
+        $uri = parse_url($url);
+        $queryArray = explode('&', $uri['query']);
+        foreach ($queryArray as $queryItem) {
+            $query = explode('=', $queryItem);
+            if ($query[0] == 'code_challenge') {
+                $this->assertEquals('l9gfJd1F1vELfLjEvQhoCYD8w7dV_QGDZCn-Hif7miM', $query[1]);
+            }
+            if ($query[0] == 'code_challenge_method') {
+                $this->assertEquals('S256', $query[1]);
+            }
+        }
+    }
+
+    public function testGetBaseAccessTokenUrlPath()
     {
         $params = [];
 
@@ -61,6 +81,37 @@ class TestEtsy extends TestCase
         $uri = parse_url($url);
 
         $this->assertEquals('/v3/public/oauth/token', $uri['path']);
+    }
+
+    public function testGetBaseAccessTokenUrl()
+    {
+        $params = [];
+
+        $url = $this->provider->getBaseAccessTokenUrl($params);
+        $uri = parse_url($url);
+
+        $this->assertEquals('openapi.etsy.com', $uri['host']);
+    }
+
+    public function testGetBaseAccessTokenUrlParams()
+    {
+        $params = [
+            'code' => 'mock_authorization_code',
+            'code_verifier' => 'mock_code_verifier'
+        ];
+
+        $url = $this->provider->getBaseAccessTokenUrl($params);
+        $uri = parse_url($url);
+        $queryArray = explode('&', $uri['query']);
+        foreach ($queryArray as $queryItem) {
+            $query = explode('=', $queryItem);
+            if ($query[0] == 'code') {
+                $this->assertEquals('mock_authorization_code', $query[1]);
+            }
+            if ($query[0] == 'code_verifier') {
+                $this->assertEquals('mock_code_verifier', $query[1]);
+            }
+        }
     }
 
     public function testGetAccessToken()
@@ -74,7 +125,11 @@ class TestEtsy extends TestCase
         $client->shouldReceive('send')->times(1)->andReturn($response);
         $this->provider->setHttpClient($client);
 
-        $token = $this->provider->getAccessToken('authorization_code', ['code' => 'mock_authorization_code']);
+        $authParams = [
+            'code' => 'mock_authorization_code',
+            'code_verifier' => 'mock_code_verifier'
+        ];
+        $token = $this->provider->getAccessToken('authorization_code', $authParams);
 
         $this->assertEquals('mock_access_token', $token->getToken());
         $this->assertNull($token->getExpires());
@@ -218,5 +273,21 @@ class TestEtsy extends TestCase
             ->andReturn($postResponse);
         $this->provider->setHttpClient($client);
         $token = $this->provider->getAccessToken('authorization_code', ['code' => 'mock_authorization_code']);
+    }
+
+    public function testGetPreChallenge()
+    {
+        $this->assertIsString($this->provider->getPreChallenge());
+    }
+
+    public function testGetPkce()
+    {
+        $this->assertEquals('l9gfJd1F1vELfLjEvQhoCYD8w7dV_QGDZCn-Hif7miM', $this->provider->getPKCE('prechallenge'));
+    }
+
+    public function testGetPkceHasError()
+    {
+        $this->expectError();
+        $this->provider->getPKCE();
     }
 }

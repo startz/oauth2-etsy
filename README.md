@@ -50,14 +50,18 @@ $provider = new Startz\OAuth2\Client\Provider\Etsy([
     'clientId'     => '{etsy-apikey-keystring}',
     'clientSecret' => '{etsy-apikey-shared-secret}',
     'redirectUri'  => 'https://example.com/callback-url',
-    'responseType' => 'code',
 ]);
 
 if ( ! isset($_GET['code'])) 
 {
     // If we don't have an authorization code then get one
-    $authUrl                 = $provider->getAuthorizationUrl();
+    $preChallenge = $provider->getPreChallenge();
+    $authUrl = $provider->getAuthorizationUrl([
+        'code_challenge' => $provider->getPKCE($preChallenge),
+        'code_challenge_method' => 'S256'
+    ]);
     $_SESSION['oauth2state'] = $provider->getState();
+    $_SESSION['oauth2code'] = $preChallenge;
     header('Location: ' . $authUrl);
     exit;
 
@@ -65,14 +69,18 @@ if ( ! isset($_GET['code']))
 } elseif (empty($_GET['state']) || ($_GET['state'] !== $_SESSION['oauth2state'])) {
 
     unset($_SESSION['oauth2state']);
+    unset($_SESSION['oauth2code']);
     exit('Invalid state');
 
 } else {
-
+    
+    $preChallenge = $_SESSION['oauth2code'];
+    $authParams = [
+        'code' => $_GET['code'],
+        'code_verifier' => $preChallenge,
+    ];
     // Try to get an access token (using the authorization code grant)
-    $token = $provider->getAccessToken('authorization_code', [
-        'code' => $_GET['code']
-    ]);
+    $token = $provider->getAccessToken('authorization_code', $authParams);
 
     // Optional: Now you have a token you can look up a users profile data
     try {

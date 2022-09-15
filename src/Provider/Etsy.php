@@ -14,7 +14,7 @@ class Etsy extends AbstractProvider
 
     use BearerAuthorizationTrait;
 
-    protected $baseApiUrl = 'https://api.etsy.com/v3';
+    protected $baseApiUrl = 'https://openapi.etsy.com/v3';
 
     /**
      * {@inheritDoc}
@@ -29,7 +29,7 @@ class Etsy extends AbstractProvider
      */
     public function getBaseAccessTokenUrl(array $params): string
     {
-        return $this->baseApiUrl . '/public/oauth/token' . $this->buildQueryString($params);
+        return $this->baseApiUrl . '/public/oauth/token?' . $this->buildQueryString($params);
     }
 
     /**
@@ -70,15 +70,6 @@ class Etsy extends AbstractProvider
         return new EtsyResourceOwner($response, $token);
     }
 
-// DO WE NEED THIS TO SET grant_type FOR REQUESTING REFRESH TOKENS?
-//    /**
-//     * {@inheritDoc}
-//     */
-//    protected function getAuthorizationHeaders($token = null): array
-//    {
-//        return ['Authorization' => 'Bearer ' . $token];
-//    }
-
     /**
      * {@inheritDoc}
      */
@@ -87,5 +78,38 @@ class Etsy extends AbstractProvider
         return [
             'x-api-key' => $this->clientId
         ];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getScopeSeparator() : string
+    {
+        return ' ';
+    }
+
+    public function getPreChallenge() : string
+    {
+        return substr(
+            strtr(
+                base64_encode(random_bytes(64)),
+                '+/',
+                '-_'
+            ),
+            0,
+            64
+        );
+    }
+
+    public function getPKCE($preChallenge) : string
+    {
+        return trim(
+            strtr(
+                base64_encode(hash('sha256', $preChallenge, true)),
+                '+/',
+                '-_'
+            ),
+            '='
+        );
     }
 }
