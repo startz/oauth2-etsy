@@ -3,6 +3,7 @@
 [![GitHub license](https://img.shields.io/github/license/startz/oauth2-etsy.svg)](https://github.com/startz/oauth2-etsy/blob/main/LICENSE)
 [![build](https://github.com/startz/oauth2-etsy/actions/workflows/php.yml/badge.svg?branch=master)](https://github.com/startz/oauth2-etsy/actions/workflows/php.yml)
 [![codecov](https://codecov.io/gh/startz/oauth2-etsy/branch/master/graph/badge.svg)](https://codecov.io/gh/startz/oauth2-etsy)
+![Packagist Downloads](https://img.shields.io/packagist/dt/startz/oauth2-etsy)
 
 This package provides Etsy OAuth 2.0 support for the PHP League's [OAuth 2.0 Client](https://github.com/thephpleague/oauth2-client).
 
@@ -20,16 +21,6 @@ To install, use composer:
 
 ```
 composer require startz/oauth2-etsy
-```
-
-Or add the following to your `composer.json` file.
-
-```json
-{
-    "require": {
-        "startz/oauth2-etsy": "^0.0.1"
-    }
-}
 ```
 
 ## Usage
