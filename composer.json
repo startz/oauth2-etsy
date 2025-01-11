@@ -17,8 +17,8 @@
     "etsy"
   ],
   "require": {
-    "php": "^8.0",
-    "league/oauth2-client": "^2.7.0"
+    "php": "^7.3 || ^8.0",
+    "league/oauth2-client": "^2.6.1"
   },
   "require-dev": {
     "phpunit/phpunit": "~9.6.6",
