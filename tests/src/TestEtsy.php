@@ -2,14 +2,15 @@
 
 namespace StartZ\OAuth2\Client\Test;
 
-use http\Exception\UnexpectedValueException;
+use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\QueryBuilderTrait;
-use Startz\OAuth2\Client\Provider\Exception\EtsyIdentityProviderException;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\StreamInterface;
 use Startz\OAuth2\Client\Provider\Etsy;
 
 use Mockery as m;
 
-class TestEtsy extends EtsyCore
+class TestEtsy extends TestCase
 {
     use QueryBuilderTrait;
 
@@ -29,6 +30,19 @@ class TestEtsy extends EtsyCore
     {
         m::close();
         parent::tearDown();
+    }
+
+    public function testGetResourceOwnerDetailsUrl()
+    {
+        $data = [
+            'access_token' => 'mock_access_token',
+            'token_type' => 'bearer'
+        ];
+        $token = new AccessToken($data);
+        $this->assertEquals(
+            'https://openapi.etsy.com/v3/application/users/mock_access_token',
+            $this->provider->getResourceOwnerDetailsUrl($token)
+        );
     }
 
     public function testAuthorizationUrl()
@@ -180,5 +194,64 @@ class TestEtsy extends EtsyCore
     {
         $this->expectException(\ArgumentCountError::class);
         $this->provider->getPKCE();
+    }
+
+    protected function getStream($data = null) : StreamInterface
+    {
+        if (!$data) {
+            $data = [
+                'access_token' => 'mock_access_token',
+                'token_type' => 'bearer'
+            ];
+            $data = json_encode($data);
+        }
+        $stream = m::mock('Psr\Http\Message\StreamInterface');
+        $stream->shouldReceive('getContents')->andReturn($data);
+        return $stream;
+    }
+
+    protected function params() : array
+    {
+        return [
+            'code' => 'mock_authorization_code',
+            'code_verifier' => 'mock_code_verifier'
+        ];
+    }
+
+    protected function getResponse($body, $status = 200, $contentType = ['application/json'])
+    {
+        $postResponse = m::mock('Psr\Http\Message\ResponseInterface');
+        $postResponse->shouldReceive('getBody')->andReturn($body);
+        $postResponse->shouldReceive('getHeader')->andReturn($contentType);
+        $postResponse->shouldReceive('getStatusCode')->andReturn($status);
+        return $postResponse;
+    }
+
+    protected function getGuzzle($return, $recieve = 'send', $times = 1)
+    {
+        $client = m::mock('GuzzleHttp\ClientInterface');
+        $client->shouldReceive($recieve)
+            ->times($times)
+            ->andReturn($return);
+        return $client;
+    }
+
+    protected function getUserData($createTimeStamp) : array
+    {
+        return [
+            'userId' => rand(1000, 9999),
+            'loginName' => uniqid(),
+            'email'  => uniqid(),
+            'firstName'  => uniqid(),
+            'lastName' => uniqid(),
+            'createTimeStamp' => rand(946684800, 946690000),
+            'createdTimeStamp' => rand($createTimeStamp, $createTimeStamp+5000),
+            'gender' => 'female',
+            'birthMonth' => rand(1, 12),
+            'birthDay' => rand(1, 27),
+            'buyCount' => rand(1, 27),
+            'sellCount' => rand(1, 45848),
+            'imageUrl' => 'http://cdn.github.fake/image.jpg'
+        ];
     }
 }
